@@ -10,17 +10,20 @@ import type { SmtpConfig } from "./types";
 
 dotenv.config();
 
-// ─── Data file mapping ────────────────────────────────────────────────────────
-// Add new sheets here as needed: "option_name": "data/filename.csv"
-const DATA_FILES: Record<string, string> = {
-  test: "data/test.csv",
-  //   partner: "data/partner.csv",
-  //   disty: "data/disty.csv",
+// ─── Sheet config mapping ────────────────────────────────────────────────────
+// Add new options here: { data: "data/file.csv", template: "templates/file.html" }
+const SHEET_CONFIG: Record<string, { data: string; template: string }> = {
+  testEmail: { data: "data/test.csv", template: "templates/invitation.html" },
+  //   disty: {
+  //     data: "data/disty.csv",
+  //     template: "templates/invitation_disty.html",
+  //   },
+  // partner: { data: "data/partner.csv", template: "templates/invitation.html" },
 };
 
 // ─── Pre-flight checks ────────────────────────────────────────────────────────
 
-function preflight(option: string): string {
+function preflight(option: string): { dataFile: string; templateFile: string } {
   const requiredEnvVars = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS"];
   const missingEnv = requiredEnvVars.filter((v) => !process.env[v]);
   if (missingEnv.length > 0) {
@@ -30,28 +33,28 @@ function preflight(option: string): string {
     process.exit(1);
   }
 
-  const availableOptions = Object.keys(DATA_FILES).join(", ");
-  const relPath = DATA_FILES[option];
-  if (!relPath) {
+  const availableOptions = Object.keys(SHEET_CONFIG).join(", ");
+  const config = SHEET_CONFIG[option];
+  if (!config) {
     console.error(
       `[Preflight] Unknown option "${option}". Available: ${availableOptions}`,
     );
     process.exit(1);
   }
 
-  const dataFile = path.resolve(relPath);
+  const dataFile = path.resolve(config.data);
   if (!fs.existsSync(dataFile)) {
     console.error(`[Preflight] Data file not found: ${dataFile}`);
     process.exit(1);
   }
 
-  const templateFile = path.resolve("templates/invitation.html");
+  const templateFile = path.resolve(config.template);
   if (!fs.existsSync(templateFile)) {
     console.error(`[Preflight] Template not found: ${templateFile}`);
     process.exit(1);
   }
 
-  return dataFile;
+  return { dataFile, templateFile };
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -59,16 +62,14 @@ function preflight(option: string): string {
 async function main(): Promise<void> {
   const option = process.argv[2];
   if (!option) {
-    const availableOptions = Object.keys(DATA_FILES).join(", ");
+    const availableOptions = Object.keys(SHEET_CONFIG).join(", ");
     console.error(
       `[Main] Usage: npm run send -- <option>\n  Available options: ${availableOptions}`,
     );
     process.exit(1);
   }
 
-  const dataFile = preflight(option);
-  const templateFile = path.resolve("templates/invitation.html");
-  //   const distyTemplateFile = path.resolve("templates/invitation_disty.html");
+  const { dataFile, templateFile } = preflight(option);
 
   console.log(`[Main] Reading guests from: ${dataFile}`);
   const guests = await readGuests(dataFile);
