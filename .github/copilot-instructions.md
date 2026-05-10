@@ -33,6 +33,10 @@ pert-send-mails/
 ├── src/
 │ ├── types.ts # TS interfaces
 │ ├── services/
+│ ├──── **tests**/ # New: Test files go here
+│ │ ├──── EmailService.test.ts
+│ │ ├──── ExcelService.test.ts
+│ │ └──── LoggerService.test.ts
 │ │ ├── ExcelService.ts # exceljs logic
 │ │ ├── EmailService.ts # nodemailer logic
 │ │ └── LoggerService.ts # fs logic for CSV appending
