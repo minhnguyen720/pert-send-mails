@@ -1,6 +1,8 @@
 export interface Guest {
+  item: number;
   name: string;
   email: string;
+  ccEmails: string[];
 }
 
 export interface SendResult {

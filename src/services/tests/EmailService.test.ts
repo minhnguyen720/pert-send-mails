@@ -17,9 +17,11 @@ const mockSmtpConfig: SmtpConfig = {
   pass: "password",
 };
 
-const makeGuest = (index: number): Guest => ({
+const makeGuest = (index: number, ccEmails: string[] = []): Guest => ({
+  item: index,
   name: `Guest ${index}`,
   email: `guest${index}@example.com`,
+  ccEmails,
 });
 
 const HTML_BODY = "<p>Hello {{GUEST_NAME}}</p>";
@@ -90,7 +92,8 @@ describe("EmailService", () => {
       expect(mockSendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: guest.email,
-          subject: "THƯ MỜI THAM DỰ SỰ KIỆN ASUS EXPERTBOOK GRAND LAUNCH",
+          subject:
+            "THƯ MỜI THAM DỰ SỰ KIỆN ASUS EXPERTBOOK ULTRA GRAND LAUNCH - The Flagship of the Industry. Period.",
           html: HTML_BODY,
         }),
       );
@@ -101,6 +104,46 @@ describe("EmailService", () => {
 
       expect(mockSendMail).toHaveBeenCalledWith(
         expect.objectContaining({ attachments: [] }),
+      );
+    });
+
+    it("should not include cc when guest has no CC emails", async () => {
+      await service.sendInvitation(makeGuest(1, []), HTML_BODY, null);
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({ cc: undefined }),
+      );
+    });
+
+    it("should include cc when guest has one CC email", async () => {
+      await service.sendInvitation(
+        makeGuest(1, ["anthony_nguyen@asus.com"]),
+        HTML_BODY,
+        null,
+      );
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cc: "anthony_nguyen@asus.com, quynhnhu19111@gmail.com",
+        }),
+      );
+    });
+
+    it("should join multiple CC emails with comma-space", async () => {
+      await service.sendInvitation(
+        makeGuest(1, [
+          "anthony_nguyen@asus.com",
+          "vu_bui@asus.com",
+          "ginny_tran@asus.com",
+        ]),
+        HTML_BODY,
+        null,
+      );
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cc: "anthony_nguyen@asus.com, vu_bui@asus.com, ginny_tran@asus.com, quynhnhu19111@gmail.com",
+        }),
       );
     });
 

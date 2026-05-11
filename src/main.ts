@@ -14,11 +14,11 @@ dotenv.config();
 // Add new options here: { data: "data/file.csv", template: "templates/file.html" }
 const SHEET_CONFIG: Record<string, { data: string; template: string }> = {
   testEmail: { data: "data/test.csv", template: "templates/invitation.html" },
-  //   disty: {
-  //     data: "data/disty.csv",
-  //     template: "templates/invitation_disty.html",
-  //   },
-  // partner: { data: "data/partner.csv", template: "templates/invitation.html" },
+  disty: {
+    data: "data/disty.csv",
+    template: "templates/invitation_disty.html",
+  },
+  partner: { data: "data/partner.csv", template: "templates/invitation.html" },
 };
 
 // ─── Pre-flight checks ────────────────────────────────────────────────────────
@@ -95,9 +95,19 @@ async function main(): Promise<void> {
     const guest = guests[i]!;
     console.log(`[Main] Sending ${i + 1}/${guests.length}: ${guest.email}`);
 
+    const type = "1"; // partner
+    // const type = "2"; // disty
+
+    // const folder = "test";
+    const folder = "partner";
+    // const folder = "disty";
+
     const htmlBody = template({ GUEST_NAME: guest.name });
-    const jpegPath = path.resolve(`attachments/${guest.name}.jpeg`);
-    const attachmentPath = fs.existsSync(jpegPath) ? jpegPath : null;
+    const itemPadded = String(guest.item).padStart(3, "0");
+    const attachmentFileName = `E-Invitation_PARTNER ${type}_${itemPadded}000-01.jpg`;
+    const attachmentPath = path.resolve(
+      `attachments/${folder}/${attachmentFileName}`,
+    );
 
     const result = await emailService.sendInvitation(
       guest,
@@ -113,7 +123,7 @@ async function main(): Promise<void> {
     }
 
     if (i < guests.length - 1) {
-      await sleep(2000);
+      await sleep(10000);
     }
   }
 

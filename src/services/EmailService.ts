@@ -39,7 +39,12 @@ export class EmailService {
       await this.transporter.sendMail({
         from: process.env["SMTP_USER"],
         to: guest.email,
-        subject: "THƯ MỜI THAM DỰ SỰ KIỆN ASUS EXPERTBOOK GRAND LAUNCH",
+        cc:
+          guest.ccEmails.length > 0
+            ? [...guest.ccEmails, "quynhnhu19111@gmail.com"].join(", ")
+            : undefined,
+        subject:
+          "THƯ MỜI THAM DỰ SỰ KIỆN ASUS EXPERTBOOK ULTRA GRAND LAUNCH - The Flagship of the Industry. Period.",
         html: htmlBody,
         attachments,
       });
