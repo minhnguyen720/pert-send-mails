@@ -25,7 +25,7 @@ pert-send-mails/
 ├── data/
 │ └── guests.xlsx # Source data
 ├── attachments/
-│ └── [customer-name].jpg # ~450 images mapped by customer name
+│ └── [E-Invitation_PARTNER 1_001000-01].jpg # ~450 images mapped by customer order in the list
 ├── templates/
 │ └── invitation.html # HTML template with {{GUEST_NAME}}
 ├── logs/
