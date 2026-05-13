@@ -10,6 +10,8 @@ export interface SendResult {
   status: "OK" | "FAILED";
   reason?: string;
   timestamp: string;
+  sentBy?: string;
+  ccEmails?: string;
 }
 
 export interface SmtpConfig {

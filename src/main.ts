@@ -2,11 +2,11 @@ import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import Handlebars from "handlebars";
-import { readGuests } from "./services/ExcelService";
 import { EmailService } from "./services/EmailService";
 import { LoggerService } from "./services/LoggerService";
 import { sleep } from "./utils/sleep";
 import type { SmtpConfig } from "./types";
+import { readGuests } from "./services/ExcelService";
 
 dotenv.config();
 
@@ -19,12 +19,22 @@ const SHEET_CONFIG: Record<string, { data: string; template: string }> = {
     template: "templates/invitation_disty.html",
   },
   partner: { data: "data/partner.csv", template: "templates/invitation.html" },
+  partner_fw: {
+    data: "data/partner-fw.csv",
+    template: "templates/invitation.html",
+  },
 };
 
 // ─── Pre-flight checks ────────────────────────────────────────────────────────
 
 function preflight(option: string): { dataFile: string; templateFile: string } {
-  const requiredEnvVars = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS"];
+  const requiredEnvVars = [
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "SMTP_FROM",
+  ];
   const missingEnv = requiredEnvVars.filter((v) => !process.env[v]);
   if (missingEnv.length > 0) {
     console.error(
@@ -98,8 +108,8 @@ async function main(): Promise<void> {
     const type = "1"; // partner
     // const type = "2"; // disty
 
-    // const folder = "test";
-    const folder = "partner";
+    const folder = "test";
+    // const folder = "partner";
     // const folder = "disty";
 
     const htmlBody = template({ GUEST_NAME: guest.name });
